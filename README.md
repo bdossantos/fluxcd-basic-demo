@@ -60,3 +60,10 @@ flux get image policy app
 ```
 watch kubectl get deployment/app -n demo -oyaml | grep 'image:'
 ```
+
+## Drift
+
+```
+kubectl scale deployment/app --replicas=4 -n demo
+watch kubectl get po -n demo
+```
