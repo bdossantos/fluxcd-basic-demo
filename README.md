@@ -4,8 +4,8 @@
 ./scripts/minikube
 cd app/
 echo $GITHUB_TOKEN | docker login docker.pkg.github.com --username $GITHUB_USER --password-stdin
-docker build -t docker.pkg.github.com/bdossantos/fluxcd-basic-demo/app:v1.0.0 .
-docker push docker.pkg.github.com/bdossantos/fluxcd-basic-demo/app:v1.0.0
+docker build -t bdossantos/fluxcd-basic-demo/app:v1.0.0 .
+docker push bdossantos/fluxcd-basic-demo/app:v1.0.0
 ```
 
 ## Tell Flux to pull and apply changes:
