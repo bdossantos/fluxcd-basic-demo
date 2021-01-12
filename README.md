@@ -46,13 +46,13 @@ flux create image update flux-system \
 ## Wait for Flux to fetch the image tag list from GitHub container registry:
 
 ```
-flux get image repository demo
+flux get image repository app
 ```
 
 ## Find which image tag matches the policy semver range with:
 
 ```
-flux get image policy demo
+flux get image policy app
 ```
 
 ## Watch deployment
