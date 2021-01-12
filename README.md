@@ -14,6 +14,35 @@ docker push docker.pkg.github.com/bdossantos/fluxcd-basic-demo/app:v1.0.0
 flux reconcile kustomization flux-system --with-source
 ```
 
+## Configure Image scanning
+
+```
+flux create image repository app \
+  --image=bdossantos/fluxcd-basic-demo \
+  --interval=1m \
+  --export > ./clusters/demo/app-registry.yaml
+```
+
+Create an ImagePolicy to tell Flux which semver range to use when filtering tags:
+
+```
+flux create image policy app \
+  --image-ref=app \
+  --interval=1m \
+  --semver=1.0.x \
+  --export > ./clusters/demo/app-policy.yaml
+```
+
+```
+flux create image update flux-system \
+  --git-repo-ref=flux-system \
+  --branch=main \
+  --author-name=fluxcdbot \
+  --author-email=fluxcdbot@users.noreply.github.com \
+  --commit-template="[ci skip] update image" \
+  --export > ./clusters/demo/flux-system-automation.yaml
+```
+
 ## Wait for Flux to fetch the image tag list from GitHub container registry:
 
 ```
