@@ -1,0 +1,68 @@
+#!/usr/bin/env bash
+
+set -o errexit
+set -o pipefail
+set -o nounset
+
+DEBUG=${DEBUG:=0}
+[[ $DEBUG -eq 1 ]] && set -o xtrace
+
+CLUSTER_NAME="${CLUSTER_NAME:='demo'}"
+CPUS=${CPUS:=2}
+DISK_SIZE=${DISK_SIZE:='10g'}
+GITHUB_TOKEN=${GITHUB_TOKEN:-}
+GITHUB_USER=${GITHUB_USER:='bdossantos'}
+KUBERNETES_VERSION=${KUBERNETES_VERSION:='1.20.1'}
+MEMORY=${MEMORY:=4096}
+VM_DRIVER=${VM_DRIVER:='virtualbox'}
+
+if ! command -v minikube &>/dev/null; then
+  echo >&2 "minikube isn't installed or not in PATH"
+  exit 1
+fi
+
+if ! command -v flux &>/dev/null; then
+  echo >&2 "flux isn't installed or not in PATH"
+  exit 1
+fi
+
+if ! command -v kubectl &>/dev/null; then
+  echo >&2 "kubectl isn't installed or not in PATH"
+  exit 1
+fi
+
+if ! minikube status -p "${CLUSTER_NAME}" &>/dev/null; then
+  minikube start \
+    --kubernetes-version "${KUBERNETES_VERSION}" \
+    --cpus "${CPUS}" \
+    --memory "${MEMORY}" \
+    --disk-size "${DISK_SIZE}" \
+    --vm-driver "${VM_DRIVER}" \
+    -p "${CLUSTER_NAME}"
+fi
+
+kubectl config use-context "${CLUSTER_NAME}"
+
+kubectl cluster-info
+
+kubectl get nodes
+
+flux check --pre
+
+echo '--> Add flux namespace'
+kubectl create namespace flux --dry-run=client -o yaml | kubectl apply -f -
+
+echo "--> Use ${GITHUB_USER}/fluxcd-basic-demo as repo source"
+# https://toolkit.fluxcd.io/get-started/
+# --components-extra=image-reflector-controller,image-automation-controller \
+flux bootstrap github \
+  --components=source-controller,kustomize-controller \
+  --owner="$GITHUB_USER" \
+  --repository=fluxcd-basic-demo \
+  --branch=main \
+  --path=./clusters/demo \
+  --personal
+
+#kubectl expose -n demo deployment app --type=NodePort --port=80 --dry-run=client -o yaml | kubectl apply -f -
+
+minikube -p demo service app -n demo --url

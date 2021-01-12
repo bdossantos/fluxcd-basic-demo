@@ -1,0 +1,25 @@
+---
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: docker/login-action@v1
+        with:
+          username: bdossantos
+          password: ${{ secrets.DOCKER_PASSWORD }}
+      - name: Push to Docker Hub
+        uses: docker/build-push-action@v2
+        with:
+          load: true
+          tags: bdossantos/fluxcd-basic-demo:latest
+          context: app/
+      - run: docker push bdossantos/fluxcd-basic-demo:latest
