@@ -54,3 +54,9 @@ flux get image repository demo
 ```
 flux get image policy demo
 ```
+
+## Watch deployment
+
+```
+watch kubectl get deployment/app -n demo -oyaml | grep 'image:'
+```
