@@ -60,6 +60,7 @@ flux bootstrap github \
   --repository=fluxcd-basic-demo \
   --branch=main \
   --path=./clusters/demo \
+  --token-auth \
   --personal
 
 #kubectl expose -n demo deployment app --type=NodePort --port=80 --dry-run=client -o yaml | kubectl apply -f -
